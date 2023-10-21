@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  SupplierID     Int             @id @default(autoincrement())
+  SupplierName   String
+  ContactName    String
+  ContactEmail   String
+  ContactPhone   String
+  // Define relationships
+  products       Product[]
+  purchaseOrders PurchaseOrder[]
+}
+
+model Category {
+  CategoryID   Int       @id @default(autoincrement())
+  CategoryName String
+  // Define relationships
+  products     Product[]
+}
+
+model Product {
+  ProductID       Int              @id @default(autoincrement())
+  ProductName     String
+  Description     String?
+  Price           Float
+  QuantityInStock Int
+  SupplierID      Int
+  CategoryID      Int
+  // Define relationships
+  supplier        Supplier         @relation(fields: [SupplierID], references: [SupplierID])
+  category        Category         @relation(fields: [CategoryID], references: [CategoryID])
+  orderItems      OrderItem[]
+  SalesOrderItem  SalesOrderItem[]
+}
+
+model PurchaseOrder {
+  OrderID    Int         @id @default(autoincrement())
+  SupplierID Int
+  OrderDate  DateTime
+  Status     String
+  // Define relationships
+  supplier   Supplier    @relation(fields: [SupplierID], references: [SupplierID])
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  OrderItemID   Int           @id @default(autoincrement())
+  OrderID       Int
+  ProductID     Int
+  Quantity      Int
+  UnitPrice     Float
+  UnitPriceSale Float
+  // Define relationships
+  order         PurchaseOrder @relation(fields: [OrderID], references: [OrderID])
+  product       Product       @relation(fields: [ProductID], references: [ProductID])
+}
+
+model Customer {
+  CustomerID  Int          @id @default(autoincrement())
+  FirstName   String
+  LastName    String
+  Email       String
+  Phone       String
+  // Define relationships
+  salesOrders SalesOrder[]
+}
+
+model SalesOrder {
+  OrderID    Int              @id @default(autoincrement())
+  CustomerID Int
+  OrderDate  DateTime
+  Status     String
+  // Define relationships
+  customer   Customer         @relation(fields: [CustomerID], references: [CustomerID])
+  orderItems SalesOrderItem[]
+}
+
+model SalesOrderItem {
+  OrderItemID Int        @id @default(autoincrement())
+  OrderID     Int
+  ProductID   Int
+  Quantity    Int
+  UnitPrice   Float
+  // Define relationships
+  order       SalesOrder @relation(fields: [OrderID], references: [OrderID])
+  product     Product    @relation(fields: [ProductID], references: [ProductID])
+}
+
+model User {
+  UserID       Int            @id @default(autoincrement())
+  Username     String
+  PasswordHash String
+  // Define relationships
+  userRoles    UserUserRole[]
+}
+
+model UserRole {
+  UserRoleID Int            @id @default(autoincrement())
+  RoleName   String
+  // Define relationships
+  users      UserUserRole[]
+}
+
+model UserUserRole {
+  UserUserRoleID Int      @id @default(autoincrement())
+  UserID         Int
+  UserRoleID     Int
+  // Define relationships
+  user           User     @relation(fields: [UserID], references: [UserID])
+  role           UserRole @relation(fields: [UserRoleID], references: [UserRoleID])
+}
